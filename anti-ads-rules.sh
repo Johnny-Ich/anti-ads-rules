@@ -43,7 +43,7 @@ else
 fi
 
 wget -q -O tmpfile "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=nohtml&showintro=0&mimetype=plaintext"
-linestmpfile=&(cat tmpfile | wc -l)
+linestmpfile=$(cat tmpfile | wc -l)
 cat tmpfile | while read line; do
 	host $line | grep 'has address' | cut -d ' ' -f 4 | while read adblockIP; do
 		sed -i "$(echo "$linestart")a$(echo "-A FORWARD -d $adblockIP -o eth0 -j REJECT --reject-with icmp-host-prohibited")" rules.v4
