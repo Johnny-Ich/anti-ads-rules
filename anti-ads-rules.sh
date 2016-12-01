@@ -7,7 +7,7 @@
 # License: 	GNU GENERAL PUBLIC LICENSE Version 3
 
 ### Settings ###
-ipver="both" 		# "v4" OR "v6" OR "both"
+ipver="v4" 		# "v4" OR "v6" OR "both"
 chain="FORWARD"		# "FORWARD" for Router/Firwall OR "OUTPUT" for local machine
 iface="eth0"		# Interface on wich to Apply these Rules on
 action="REJECT"		# "REJECT" OR "DROP" or others...
@@ -19,16 +19,15 @@ typeset -i linestart
 typeset -i lineend
 typeset -i linedelete
 typeset -i linedeleteend
+typeset -i linedeletecounter
 typeset -i lineinsert
 typeset -i linestmpfile
 typeset -i count
 
 if [[ $action == "REJECT" ]]; then action="REJECT --reject-with icmp-host-prohibited"; fi
 
-iptables-save > /etc/iptables/rules.v4
 cp /etc/iptables/rules.v4 /etc/iptables/BACKUP_rules.v4
 cp /etc/iptables/rules.v4 .
-ip6tables-save > /etc/iptables/rules.v6
 cp /etc/iptables/rules.v6 /etc/iptables/BACKUP_rules.v6
 cp /etc/iptables/rules.v6 .
 
@@ -76,19 +75,29 @@ do
 		if [[ $ipver == "v4" || $count == 2 ]]
 		then
 			# IPv4 Regeln einfügen
-			echo $line | grep 'has address' | cut -d ' ' -f 4 | sed -i "$(echo "$linestart")a$(echo "-A $chain -d $adblockIP -o $iface -j $action")" rules.v4
+			IP=$(echo $adblockIP | grep 'has address' | cut -d ' ' -f 4 )
+			if [[ $IP == "" ]]
+			then
+				leer=0
+			else			
+				sed -i "$(echo "$linestart")a$(echo "-A $chain -d $IP -o $iface -j $action")" rules.v4
+			fi
 		fi
 		if [[ $ipver == "v6" || $count == 2 ]]
 		then
 			# IPv6 Regeln einfügen
-			echo $line | grep 'has IPv6 address' | cut -d ' ' -f 4 | sed -i "$(echo "$linestart")a$(echo "-A $chain -d $adblockIP -o $iface -j $action")" rules.v6
+			IP=$(echo $adblockIP | grep 'has IPv6 address' | cut -d ' ' -f 5 )
+			if [[ $IP == "" ]]
+			then
+				leer=0
+			else
+				sed -i "$(echo "$linestart")a$(echo "-A $chain -d $IP -o $iface -j $action")" rules.v6
+			fi
 		fi
 	done
 	i=$i+1
 	progress=$(echo "scale=2;$i/$linestmpfile*100" | bc | cut -d . -f 1)
 	echo -ne "\rProgress: $progress%"
-	
-	if [[ $debug == "true"]];then exit; fi
 done
 
 cp rules.v4 /etc/iptables/rules.v4
