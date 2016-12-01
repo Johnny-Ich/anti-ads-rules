@@ -23,6 +23,8 @@ typeset -i linedeletecounter
 typeset -i lineinsert
 typeset -i linestmpfile
 typeset -i count
+typeset -i linestartv4
+typeset -i linestartv6
 
 if [[ $action == "REJECT" ]]; then action="REJECT --reject-with icmp-host-prohibited"; fi
 
@@ -42,6 +44,8 @@ do
 	if [[ $linestart == $lineend ]]
 	then
 		linestart=$(sed -n "/-A $chain/=" rules.$ipver | head -1)
+		if [[ $ipver == "v4" ]]; then; linestartv4=$linestart; fi
+		if [[ $ipver == "v6" ]]; then; linestartv6=$linestart; fi
 		lineinsert=$linestart-1
 		sed -i "$(echo "$lineinsert")a$(echo "# adblock-script-start")" rules.$ipver
 		sed -i "$(echo "$linestart")a$(echo "# adblock-script-end")" rules.$ipver
@@ -80,7 +84,7 @@ do
 			then
 				leer=0
 			else			
-				sed -i "$(echo "$linestart")a$(echo "-A $chain -d $IP -o $iface -j $action")" rules.v4
+				sed -i "$(echo "$linestartv4")a$(echo "-A $chain -d $IP -o $iface -j $action")" rules.v4
 			fi
 		fi
 		if [[ $ipver == "v6" || $count == 2 ]]
@@ -91,7 +95,7 @@ do
 			then
 				leer=0
 			else
-				sed -i "$(echo "$linestart")a$(echo "-A $chain -d $IP -o $iface -j $action")" rules.v6
+				sed -i "$(echo "$linestartv6")a$(echo "-A $chain -d $IP -o $iface -j $action")" rules.v6
 			fi
 		fi
 	done
