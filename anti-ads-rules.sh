@@ -12,6 +12,9 @@ chain="FORWARD"		# "FORWARD" for Router/Firwall OR "OUTPUT" for local machine
 iface="eth0"		# Interface on wich to Apply these Rules on
 action="REJECT"		# "REJECT" OR "DROP" or others...
 debug="true"		# just do the loop one time and exit without taking rules active
+			# for future use
+#Path to whitelist
+whitelist="./whitelist"
 
 # Variablen als integer deklarieren, da sonst keine Berechnungen möglich
 typeset -i i
@@ -80,10 +83,8 @@ do
 		then
 			# IPv4 Regeln einfügen
 			IP=$(echo $adblockIP | grep 'has address' | cut -d ' ' -f 4 )
-			if [[ $IP == "" ]]
+			if [[ $IP != "" ]]
 			then
-				leer=0
-			else			
 				sed -i "$(echo "$linestartv4")a$(echo "-A $chain -d $IP -o $iface -j $action")" rules.v4
 			fi
 		fi
@@ -91,10 +92,8 @@ do
 		then
 			# IPv6 Regeln einfügen
 			IP=$(echo $adblockIP | grep 'has IPv6 address' | cut -d ' ' -f 5 )
-			if [[ $IP == "" ]]
+			if [[ $IP != "" ]]
 			then
-				leer=0
-			else
 				sed -i "$(echo "$linestartv6")a$(echo "-A $chain -d $IP -o $iface -j $action")" rules.v6
 			fi
 		fi
@@ -103,6 +102,19 @@ do
 	progress=$(echo "scale=2;$i/$linestmpfile*100" | bc | cut -d . -f 1)
 	echo -ne "\rProgress: $progress%"
 done
+
+#Whitelist abarbeiten
+if [ -f "$whitelist" ]
+then
+	cat $whitelist | while read entry
+	do
+		IPw=$(echo $entry | grep -E '[0-9]{1,4}')
+		if [[ $IPw != "" ]]
+		then
+			sed -i '/$IPw/d' rules.v4
+		fi
+	done
+fi
 
 cp rules.v4 /etc/iptables/rules.v4
 iptables-restore < /etc/iptables/rules.v4
