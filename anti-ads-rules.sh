@@ -70,6 +70,12 @@ do
 done
 
 wget -q -O tmpfile "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=nohtml&showintro=0&mimetype=plaintext"
+
+if [ -f $blacklist]
+then
+	cat $blacklist >> tmpfile
+fi
+
 linestmpfile=$(cat tmpfile | wc -l)
 
 # Counter wieder heruntersetzen
