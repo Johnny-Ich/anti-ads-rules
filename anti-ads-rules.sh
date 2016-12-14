@@ -15,6 +15,8 @@ debug="true"		# just do the loop one time and exit without taking rules active
 			# for future use
 #Path to whitelist
 whitelist="./whitelist"
+#Path to blacklist
+blacklist="./blacklist"
 
 # Variablen als integer deklarieren, da sonst keine Berechnungen möglich
 typeset -i i
