@@ -29,7 +29,7 @@ typeset -i count
 typeset -i linestartv4
 typeset -i linestartv6
 
-if [[ $action == "REJECT" ]]; then action="REJECT --reject-with icmp-host-prohibited"; fi
+#if [[ $action == "REJECT" ]]; then action="REJECT --reject-with icmp-host-prohibited"; fi
 
 cp /etc/iptables/rules.v4 /etc/iptables/BACKUP_rules.v4
 cp /etc/iptables/rules.v4 .
@@ -108,11 +108,19 @@ if [ -f "$whitelist" ]
 then
 	cat $whitelist | while read entry
 	do
-		IPw=$(echo $entry | grep -E '[0-9]{1,4}')
+		IPw=$(echo $entry | grep -E '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*' | cut -d ' ' -f 1)
 		if [[ $IPw != "" ]]
 		then
 			sed -i '/$IPw/d' rules.v4
 		fi
+		
+		IPwv6=$(echo $entry | grep -E ':' | cut -d ' ' -f 1)
+		if [[ $IPwv6 != "" ]]
+		then
+			sed -i '/$IPwv6/d' rules.v6
+		fi
+	
+		
 	done
 fi
 
