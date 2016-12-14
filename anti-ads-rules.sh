@@ -49,8 +49,6 @@ do
 	if [[ $linestart == $lineend ]]
 	then
 		linestart=$(sed -n "/-A $chain/=" rules.$ipver | head -1)
-		if [[ $ipver == "v4" ]]; then linestartv4=$linestart; fi
-		if [[ $ipver == "v6" ]]; then linestartv6=$linestart; fi
 		lineinsert=$linestart-1
 		sed -i "$(echo "$lineinsert")a$(echo "# adblock-script-start")" rules.$ipver
 		sed -i "$(echo "$linestart")a$(echo "# adblock-script-end")" rules.$ipver
@@ -66,6 +64,10 @@ do
         		linedeletecounter=$linedeletecounter+1
 		done
 	fi
+
+	
+	if [[ $ipver == "v4" ]]; then linestartv4=$linestart; fi
+	if [[ $ipver == "v6" ]]; then linestartv6=$linestart; fi
 	
 	if [[ $i == 0 && $count == 2 ]] ;then ipver=v6; fi
 	if [[ $i == 1 && $count == 2 ]] ;then ipver=v4; fi
