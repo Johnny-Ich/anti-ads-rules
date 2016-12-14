@@ -73,7 +73,7 @@ done
 
 wget -q -O tmpfile "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=nohtml&showintro=0&mimetype=plaintext"
 
-if [ -f $blacklist]
+if [ -f $blacklist ]
 then
 	cat $blacklist >> tmpfile
 fi
