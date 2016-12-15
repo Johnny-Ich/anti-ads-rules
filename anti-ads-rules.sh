@@ -7,7 +7,7 @@
 # License: 	GNU GENERAL PUBLIC LICENSE Version 3
 
 ### Settings ###
-ipver="v4" 		# "v4" OR "v6" OR "both"
+ipver="both" 		# "v4" OR "v6" OR "both"
 chain="FORWARD"		# "FORWARD" for Router/Firwall OR "OUTPUT" for local machine
 iface="eth0"		# Interface on wich to Apply these Rules on
 action="REJECT"		# "REJECT" OR "DROP" or others...
@@ -121,13 +121,13 @@ then
 		IPw=$(echo $entry | grep -E '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*' | cut -d ' ' -f 1)
 		if [[ $IPw != "" ]]
 		then
-			sed -i '/$IPw/d' rules.v4
+			sed -i "/$IPw/d" rules.v4
 		fi
 		
 		IPwv6=$(echo $entry | grep -E ':' | cut -d ' ' -f 1)
 		if [[ $IPwv6 != "" ]]
 		then
-			sed -i '/$IPwv6/d' rules.v6
+			sed -i "/$IPwv6/d" rules.v6
 		fi
 	
 		
